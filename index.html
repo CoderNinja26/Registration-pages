@@ -281,7 +281,7 @@
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
-
+            const google_sheet_url = "https://script.google.com/macros/s/AKfycbx7vCep4Cl4r9YWrpTrtUiIY3CK2xukmraOx0gdbRiwzYM-FTfe8Nt6uNa30YDyIeQyIg/exec";
         const initAuth = async (retries = 3) => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
