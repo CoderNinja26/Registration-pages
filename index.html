@@ -56,35 +56,14 @@
             border-color: var(--neon-blue);
             box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
         }
-        select option {
-            background: #1a1a1a;
-            color: white;
-        }
         .hidden { display: none; }
         
-        .pulse { animation: pulse 2s infinite; }
         @keyframes pulse {
             0% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
             100% { opacity: 1; }
         }
-
-        /* Loading Spinner */
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid var(--neon-blue);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .pulse { animation: pulse 2s infinite; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 md:p-10">
@@ -114,15 +93,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <div class="glass p-6 rounded-2xl text-center">
                     <p class="text-xs text-cyan-400 uppercase mb-1">Date</p>
-                    <p class="text-2xl font-bold">01 APRIL</p>
+                    <p class="text-2xl font-bold text-white">01 APRIL</p>
                 </div>
                 <div class="glass p-6 rounded-2xl text-center">
                     <p class="text-xs text-purple-400 uppercase mb-1">Vibe Check</p>
-                    <p class="text-2xl font-bold">09:00 AM</p>
+                    <p class="text-2xl font-bold text-white">09:00 AM</p>
                 </div>
                 <div class="glass p-6 rounded-2xl text-center">
                     <p class="text-xs text-cyan-400 uppercase mb-1">Location</p>
-                    <p class="text-2xl font-bold">DRIOE LAB</p>
+                    <p class="text-2xl font-bold text-white">DREIMS</p>
                 </div>
             </div>
 
@@ -148,17 +127,16 @@
 
             <div class="mb-10">
                 <h2 class="header-font text-3xl font-bold mb-2">Registration <span class="vibe-gradient">Portal</span></h2>
-                <p class="text-gray-400 text-sm">Real-time cross-device synchronization enabled.</p>
                 <div id="authStatus" class="mt-4 text-[10px] uppercase tracking-widest text-yellow-500 font-bold flex items-center gap-2">
-                    <div class="h-1.5 w-1.5 rounded-full bg-yellow-500"></div>
-                    Establishing Cloud Socket...
+                    <span id="statusCircle" class="w-2 h-2 rounded-full bg-yellow-500 pulse"></span>
+                    <span id="statusText">Connecting to Cloud...</span>
                 </div>
             </div>
 
             <form id="registrationForm" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="text" id="firstName" class="input-field" placeholder="First Name" required minlength="2">
-                    <input type="text" id="lastName" class="input-field" placeholder="Last Name" required minlength="2">
+                    <input type="text" id="firstName" class="input-field" placeholder="First Name" required>
+                    <input type="text" id="lastName" class="input-field" placeholder="Last Name" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <input type="email" id="email" class="input-field" placeholder="Email Address" required>
@@ -169,6 +147,7 @@
                         <option value="" disabled selected>Select Branch</option>
                         <option value="CS">Computer Science</option>
                         <option value="IT">Information Technology</option>
+                        <option value="AI&ML">AI & ML</option>
                         <option value="EXTC">EXTC</option>
                         <option value="MECH">Mechanical</option>
                         <option value="CIVIL">Civil</option>
@@ -181,9 +160,6 @@
                         <option value="BE">Final Year</option>
                     </select>
                 </div>
-                
-                <div id="formErrorMessage" class="text-red-400 text-sm text-center hidden font-medium bg-red-400/10 py-3 rounded-lg border border-red-400/20"></div>
-
                 <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white py-4 rounded-xl font-bold hover:opacity-90 transition-all uppercase">
                     Submit Registration
                 </button>
@@ -194,204 +170,127 @@
         <div id="adminPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <div>
-                    <div class="flex items-center gap-2">
-                         <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
-                         <div class="h-2 w-2 rounded-full bg-green-500 pulse"></div>
-                    </div>
-                    <p class="text-gray-400 text-xs mt-1">Live Updates: <span id="regCount" class="text-white font-bold">0</span> students registered</p>
+                    <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
+                    <p class="text-gray-400 text-xs mt-1">Total Registrations: <span id="totalCount" class="text-white font-bold">0</span></p>
                 </div>
                 <div class="flex gap-3">
                     <button id="exportBtn" class="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white px-6 py-2 rounded-lg border border-green-600/30 transition-all text-sm font-bold flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                        Export Excel
+                        Export XLSX
                     </button>
                     <button onclick="showPage('posterPage')" class="bg-white/10 px-4 py-2 rounded-lg text-sm">Close</button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-xl border border-white/10 max-h-[500px] overflow-y-auto">
+            <div class="overflow-x-auto rounded-xl border border-white/10 max-h-[500px]">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest sticky top-0 backdrop-blur-md z-10">
+                    <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest sticky top-0 backdrop-blur-md">
                         <tr>
-                            <th class="p-4">Student Name</th>
-                            <th class="p-4">Contact Info</th>
+                            <th class="p-4">Name</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Phone</th>
                             <th class="p-4">Branch/Year</th>
-                            <th class="p-4 text-right">Actions</th>
+                            <th class="p-4 text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="studentTableBody">
-                    </tbody>
+                    <tbody id="studentTableBody"></tbody>
                 </table>
             </div>
-            <div id="noData" class="text-center py-10 text-gray-500 hidden">No registrations yet.</div>
+            <div id="noData" class="text-center py-10 text-gray-500 hidden">No data found.</div>
         </div>
     </div>
 
-    <!-- Auth Modal -->
+    <!-- Modals (Admin Auth, Success, Delete) -->
     <div id="authModal" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[60] hidden">
         <div class="glass p-10 rounded-3xl max-w-sm w-full text-center border-white/10">
             <h3 class="header-font text-xl font-bold mb-6">Admin Access</h3>
             <input type="password" id="adminPass" class="input-field text-center mb-4" placeholder="Enter PIN">
-            <div id="authError" class="text-red-400 text-xs mb-4 hidden">Incorrect Password</div>
+            <div id="authError" class="text-red-400 text-xs mb-4 hidden">Incorrect PIN</div>
             <div class="flex gap-3">
-                <button onclick="closeAuthModal()" class="flex-1 bg-white/10 py-3 rounded-xl font-bold uppercase tracking-widest text-sm">Cancel</button>
-                <button onclick="verifyAdmin()" class="flex-1 bg-cyan-500 text-black py-3 rounded-xl font-bold uppercase tracking-widest text-sm">Verify</button>
+                <button onclick="closeAuthModal()" class="flex-1 bg-white/10 py-3 rounded-xl font-bold uppercase text-sm">Cancel</button>
+                <button onclick="verifyAdmin()" class="flex-1 bg-cyan-500 text-black py-3 rounded-xl font-bold uppercase text-sm">Verify</button>
             </div>
         </div>
     </div>
 
-    <!-- Success Modal -->
     <div id="successModal" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[100] hidden">
         <div class="glass p-10 rounded-3xl max-w-sm text-center border-cyan-400/30">
             <div class="w-16 h-16 bg-cyan-400/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </div>
-            <h3 class="header-font text-2xl font-bold mb-2 text-white">Submitted!</h3>
-            <p class="text-gray-400 mb-8">Data has been pushed to the central cloud database.</p>
-            <button id="closeSuccessBtn" class="w-full bg-cyan-400 text-black py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-colors">Done</button>
+            <h3 class="header-font text-2xl font-bold mb-2">Success!</h3>
+            <p class="text-gray-400 mb-8">You are registered for Vibe Coding 2026.</p>
+            <button onclick="closeSuccess()" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase">Great</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, Timestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // CONFIGURATION: You can add your databaseURL here if using Realtime Database
-        const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
-            ? JSON.parse(__firebase_config) 
-            : {
-                apiKey: "AIzaSyAk3HlIlYCRi24ctsVo3wkZq9dqWLqFCqM",
-                authDomain: "registration-page-5025d.firebaseapp.com",
-                projectId: "registration-page-5025d",
-                storageBucket: "registration-page-5025d.firebasestorage.app",
-                messagingSenderId: "142199310593",
-                appId: "1:142199310593:web:a2cc72fa4d0ce3eb15b300",
-                measurementId: "G-JK512LQHFF",
-                databaseURL: "https://registration-page-5025d-default-rtdb.firebaseio.com"
-            };
+        // Global environment variables provided by platform
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vibe-hack-2026';
+        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vibe-hack-2026';
 
+        let currentUser = null;
         let students = [];
-        let unsubscribeLive = null;
-        const ADMIN_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // PIN 1234
+        let unsubscribeSync = null;
+        const ADMIN_PIN_HASH = "03c4d3df0a118e0e002d6a4d97cba7e90f3d59b824a14d218fe20e9fe62934f4"; // PIN: 324687@
 
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // 1. Core Auth & Sync Initialization
+        // Initialize Authentication - Must happen before any Firestore call
         const init = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            try {
+                if (initialToken) {
+                    await signInWithCustomToken(auth, initialToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth initialization failed", err);
+                document.getElementById('statusText').innerText = "Auth Connection Failed";
+                document.getElementById('statusCircle').classList.replace('bg-yellow-500', 'bg-red-500');
             }
         };
 
         onAuthStateChanged(auth, (user) => {
+            currentUser = user;
             if (user) {
-                const status = document.getElementById('authStatus');
-                status.innerHTML = '<div class="h-1.5 w-1.5 rounded-full bg-green-500 pulse"></div> Real-time Stream Online';
-                status.classList.replace('text-yellow-500', 'text-green-500');
-                
-                // 2. Persistent Listener for all devices
-                if (unsubscribeLive) unsubscribeLive();
-                const q = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
-                unsubscribeLive = onSnapshot(q, (snapshot) => {
-                    students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    document.getElementById('regCount').innerText = students.length;
-                    renderTable();
-                }, (err) => console.error("Sync Error:", err));
-            }
-        });
-
-        init();
-
-        // 3. UI Navigation
-        window.showPage = (id) => {
-            ['posterPage', 'registerPage', 'adminPage'].forEach(p => document.getElementById(p).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        };
-
-        window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
-        window.closeAuthModal = () => {
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('adminPass').value = '';
-            document.getElementById('authError').classList.add('hidden');
-        };
-
-        window.verifyAdmin = async () => {
-            const pin = document.getElementById('adminPass').value;
-            if (await sha256(pin) === ADMIN_HASH) {
-                closeAuthModal();
-                showPage('adminPage');
+                document.getElementById('statusCircle').classList.replace('bg-yellow-500', 'bg-green-500');
+                document.getElementById('statusCircle').classList.remove('pulse');
+                document.getElementById('statusText').innerText = "Secured Connection Active";
+                startListening();
             } else {
-                document.getElementById('authError').classList.remove('hidden');
-            }
-        };
-
-        // 4. Form Submission with Cross-Device Validation
-        const registrationForm = document.getElementById('registrationForm');
-        registrationForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const errorMsg = document.getElementById('formErrorMessage');
-            
-            errorMsg.classList.add('hidden');
-            btn.innerHTML = '<span class="spinner"></span> Syncing with Cloud...';
-            btn.disabled = true;
-
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            const phone = document.getElementById('phone').value.trim();
-
-            // Check against live local snapshot (synced with Firestore)
-            const isDuplicate = students.some(s => s.email.toLowerCase() === email || s.phone === phone);
-
-            if (isDuplicate) {
-                errorMsg.innerText = "Student already registered with this Email or Phone.";
-                errorMsg.classList.remove('hidden');
-                btn.innerText = "Submit Registration";
-                btn.disabled = false;
-                return;
-            }
-
-            const payload = {
-                firstName: document.getElementById('firstName').value.trim(),
-                lastName: document.getElementById('lastName').value.trim(),
-                email: email,
-                phone: phone,
-                branch: document.getElementById('branch').value,
-                year: document.getElementById('year').value,
-                timestamp: Timestamp.now()
-            };
-
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), payload);
-                registrationForm.reset();
-                btn.innerText = "Submit Registration";
-                btn.disabled = false;
-                document.getElementById('successModal').classList.remove('hidden');
-            } catch (err) {
-                btn.innerText = "Retry Sync";
-                btn.disabled = false;
-                alert("Cloud disconnected. Please try again.");
+                if (unsubscribeSync) unsubscribeSync();
             }
         });
 
-        document.getElementById('closeSuccessBtn').onclick = () => {
-            document.getElementById('successModal').classList.add('hidden');
-            showPage('posterPage');
+        const startListening = () => {
+            if (!currentUser) return; // Guard clause
+            
+            // Clean up existing listener if any
+            if (unsubscribeSync) unsubscribeSync();
+
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+            
+            unsubscribeSync = onSnapshot(colRef, 
+                (snapshot) => {
+                    students = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    document.getElementById('totalCount').innerText = students.length;
+                    renderTable();
+                }, 
+                (err) => {
+                    console.error("Sync error", err);
+                    // Silently try to re-init if it's a transient permission issue
+                }
+            );
         };
 
-        // 5. Admin Rendering
-        function renderTable() {
+        const renderTable = () => {
             const tbody = document.getElementById('studentTableBody');
             const noData = document.getElementById('noData');
             tbody.innerHTML = '';
@@ -400,52 +299,149 @@
                 noData.classList.remove('hidden');
                 return;
             }
-            
             noData.classList.add('hidden');
-            const sorted = [...students].sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-            
+
+            // Simple sort in memory to avoid index requirements
+            const sorted = [...students].sort((a,b) => {
+                const timeA = a.timestamp?.seconds || 0;
+                const timeB = b.timestamp?.seconds || 0;
+                return timeB - timeA;
+            });
+
             sorted.forEach(s => {
                 const tr = document.createElement('tr');
-                tr.className = "border-t border-white/5 hover:bg-white/5 transition-colors group";
+                tr.className = "border-t border-white/5 hover:bg-white/5 transition-colors";
                 tr.innerHTML = `
-                    <td class="p-4">
-                        <div class="font-bold text-white">${s.firstName} ${s.lastName}</div>
-                        <div class="text-[9px] text-gray-600 font-mono uppercase">${s.id.substring(0,8)}...</div>
-                    </td>
-                    <td class="p-4">
-                        <div class="text-cyan-400 text-xs">${s.email}</div>
-                        <div class="text-[10px] text-gray-500">${s.phone}</div>
-                    </td>
-                    <td class="p-4">
-                        <span class="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[9px] text-white font-bold uppercase">${s.branch}</span>
-                        <div class="text-[9px] text-gray-600 mt-1 uppercase">${s.year}</div>
-                    </td>
+                    <td class="p-4 font-bold text-white">${s.firstName || ''} ${s.lastName || ''}</td>
+                    <td class="p-4 text-cyan-400 text-xs">${s.email || ''}</td>
+                    <td class="p-4 text-gray-400">${s.phone || ''}</td>
+                    <td class="p-4"><span class="bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded text-[10px] whitespace-nowrap">${s.branch || ''} | ${s.year || ''}</span></td>
                     <td class="p-4 text-right">
-                        <button onclick="deleteEntry('${s.id}')" class="text-gray-700 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <button onclick="deleteRecord('${s.id}')" class="text-red-500/40 hover:text-red-500 p-2 transition-colors">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-        }
+        };
 
-        window.deleteEntry = async (id) => {
-            if (confirm("Permanently delete this record?")) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'registrations', id));
+        // Form Submission
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) {
+                alert("Connection lost. Please refresh the page.");
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            const emailInput = document.getElementById('email').value.trim().toLowerCase();
+            const phoneInput = document.getElementById('phone').value.trim();
+
+            // Duplicate Check in local state
+            if (students.some(s => (s.email || '').toLowerCase() === emailInput || s.phone === phoneInput)) {
+                alert("This email or phone is already registered!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Encrypting & Syncing...";
+
+            const payload = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: emailInput,
+                phone: phoneInput,
+                branch: document.getElementById('branch').value,
+                year: document.getElementById('year').value,
+                timestamp: Timestamp.now()
+            };
+
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+                await addDoc(colRef, payload);
+                document.getElementById('successModal').classList.remove('hidden');
+                document.getElementById('registrationForm').reset();
+            } catch (err) {
+                console.error("Submission error", err);
+                alert("Registration failed. Please check your internet and try again.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit Registration";
+            }
+        });
+
+        // Admin Auth
+        window.verifyAdmin = async () => {
+            const pin = document.getElementById('adminPass').value;
+            if (!pin) return;
+
+            const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
+            const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            if (hashHex === ADMIN_PIN_HASH) {
+                document.getElementById('adminPass').value = '';
+                document.getElementById('authError').classList.add('hidden');
+                closeAuthModal();
+                showPage('adminPage');
+            } else {
+                document.getElementById('authError').classList.remove('hidden');
             }
         };
 
-        document.getElementById('exportBtn').onclick = () => {
-            if (!students.length) return;
-            const data = students.map(s => ({ 
-                Name: `${s.firstName} ${s.lastName}`, Email: s.email, Phone: s.phone, Branch: s.branch, Year: s.year 
+        window.deleteRecord = async (id) => {
+            if (!currentUser) return;
+            if (!confirm("Confirm removal of this record?")) return;
+            
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'registrations', id));
+            } catch (err) {
+                console.error("Delete error", err);
+                alert("Error deleting record. Check permissions.");
+            }
+        };
+
+        window.exportData = () => {
+            if (students.length === 0) return;
+            const data = students.map(s => ({
+                Name: `${s.firstName || ''} ${s.lastName || ''}`,
+                Email: s.email || '',
+                Phone: s.phone || '',
+                Branch: s.branch || '',
+                Year: s.year || '',
+                Date: s.timestamp?.toDate().toLocaleString() || 'N/A'
             }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Records");
-            XLSX.writeFile(wb, "Hackathon_Live_Data.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Registrations");
+            XLSX.writeFile(wb, "VibeCoding_Registrations.xlsx");
         };
+
+        // Utility functions
+        window.showPage = (id) => {
+            ['posterPage', 'registerPage', 'adminPage'].forEach(p => {
+                document.getElementById(p).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
+        };
+        
+        window.openAuthModal = () => {
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('adminPass').focus();
+        };
+        
+        window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+        
+        window.closeSuccess = () => {
+            document.getElementById('successModal').classList.add('hidden');
+            showPage('posterPage');
+        };
+
+        document.getElementById('exportBtn').onclick = window.exportData;
+
+        // Start Auth process
+        init();
     </script>
 </body>
 </html>
