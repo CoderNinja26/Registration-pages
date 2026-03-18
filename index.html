@@ -126,9 +126,6 @@
             <div class="mb-10">
                 <h2 class="header-font text-3xl font-bold mb-2">Registration <span class="vibe-gradient">Portal</span></h2>
                 <p class="text-gray-400 text-sm">Fill in your details to secure your spot.</p>
-                <div id="authStatus" class="mt-4 text-[10px] uppercase tracking-widest text-yellow-500 font-bold">
-                    Initializing Cloud sync...
-                </div>
             </div>
 
             <form id="registrationForm" action="https://script.google.com/macros/s/AKfycbx7vCep4Cl4r9YWrpTrtUiIY3CK2xukmraOx0gdbRiwzYM-FTfe8Nt6uNa30YDyIeQyIg/exec" method="POST" target="hidden_iframe" class="space-y-5">
@@ -164,7 +161,7 @@
             </form>
         </div>
 
-        <!-- SECTION 3: ADMIN DASHBOARD -->
+        <!-- SECTION 3: ADMIN DASHBOARD (Mock for now without Firebase) -->
         <div id="adminPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
@@ -179,7 +176,11 @@
                             <th class="p-4">Branch/Year</th>
                         </tr>
                     </thead>
-                    <tbody id="studentTableBody"></tbody>
+                    <tbody id="studentTableBody">
+                        <tr>
+                            <td colspan="3" class="p-4 text-center text-gray-500 italic">Please check Google Sheets for live data.</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -204,80 +205,19 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </div>
             <h3 class="header-font text-2xl font-bold mb-2">Registration Saved</h3>
-            <p class="text-gray-400 mb-8">Data has been synced to the Cloud and Google Sheets.</p>
+            <p class="text-gray-400 mb-8">Data has been synced to Google Sheets.</p>
             <button onclick="location.reload()" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase tracking-widest">Done</button>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAk3HlIlYCRi24ctsVo3wkZq9dqWLqFCqM",
-            authDomain: "registration-page-5025d.firebaseapp.com",
-            projectId: "registration-page-5025d",
-            storageBucket: "registration-page-5025d.firebasestorage.app",
-            messagingSenderId: "142199310593",
-            appId: "1:142199310593:web:a2cc72fa4d0ce3eb15b300"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = 'registration-page-5025d';
-
-        let currentUser = null;
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                document.getElementById('authStatus').innerText = "Cloud Sync Active";
-                document.getElementById('authStatus').classList.replace('text-yellow-500', 'text-green-500');
-                
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), (snapshot) => {
-                    const tbody = document.getElementById('studentTableBody');
-                    tbody.innerHTML = '';
-                    snapshot.docs.forEach(doc => {
-                        const data = doc.data();
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `<td class="p-4">${data.firstName} ${data.lastName}</td><td class="p-4">${data.email}</td><td class="p-4">${data.branch} ${data.year}</td>`;
-                        tbody.appendChild(tr);
-                    });
-                });
-            } else {
-                signInAnonymously(auth);
-            }
-        });
-
+    <script>
         const form = document.getElementById('registrationForm');
-        form.addEventListener('submit', async (e) => {
-            // We allow the browser to naturally POST to the action URL (target=hidden_iframe)
-            // But we intercept to trigger the Modal and Firebase logic
+        form.addEventListener('submit', (e) => {
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Saving...";
             btn.disabled = true;
 
-            const data = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                branch: document.getElementById('branch').value,
-                year: document.getElementById('year').value,
-                timestamp: new Date().toISOString()
-            };
-
-            // 1. Firebase backup save
-            try {
-                if (currentUser) {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), data);
-                }
-            } catch (err) {
-                console.error("Firebase error", err);
-            }
-
-            // 2. Show the Success Modal immediately
+            // Show the Success Modal immediately while the iframe handles the Google Sheet POST
             document.getElementById('successModal').classList.remove('hidden');
         });
 
