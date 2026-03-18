@@ -171,7 +171,6 @@
                 await addDoc(registrationsRef, formData);
                 
                 // 2. Google Sheets sync (Secondary)
-                // We convert values to strings and use POST with no-cors to handle redirect silently
                 const sheetData = { ...formData, timestamp: formData.timestamp.toDate().toISOString() };
                 fetch(GOOGLE_SHEET_URL, { 
                     method: 'POST', 
