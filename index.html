@@ -131,18 +131,17 @@
                 </div>
             </div>
 
-            <!-- ACTION URL UPDATED TO YOUR SCRIPT URL -->
-            <form id="registrationForm" action="https://sheetdb.io/api/v1/m1d4w5urnx5ly" method="POST" target="hidden_iframe" class="space-y-5">
+            <form id="registrationForm" action="https://script.google.com/macros/s/AKfycbx7vCep4Cl4r9YWrpTrtUiIY3CK2xukmraOx0gdbRiwzYM-FTfe8Nt6uNa30YDyIeQyIg/exec" method="POST" target="hidden_iframe" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="text" id="firstName" name="data[firstName]" class="input-field" placeholder="First Name" required>
-                    <input type="text" id="lastName" name="data[lastName]" class="input-field" placeholder="Last Name" required>
+                    <input type="text" id="firstName" name="firstName" class="input-field" placeholder="First Name" required>
+                    <input type="text" id="lastName" name="lastName" class="input-field" placeholder="Last Name" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="email" id="email" name="data[email]" class="input-field" placeholder="Email" required>
-                    <input type="tel" id="phone" name="data[phone]" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
+                    <input type="email" id="email" name="email" class="input-field" placeholder="Email" required>
+                    <input type="tel" id="phone" name="phone" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <select id="branch" name="data[branch]" class="input-field" required>
+                    <select id="branch" name="branch" class="input-field" required>
                         <option value="" disabled selected>Select Branch</option>
                         <option value="CS">Computer Science</option>
                         <option value="IT">Information Technology</option>
@@ -151,7 +150,7 @@
                         <option value="CIVIL">Civil</option>
                         <option value="Electrical">Electrical</option>
                     </select>
-                    <select id="year" name="data[year]" class="input-field" required>
+                    <select id="year" name="year" class="input-field" required>
                         <option value="" disabled selected>Select Year</option>
                         <option value="FE">First Year</option>
                         <option value="SE">Second Year</option>
@@ -204,8 +203,8 @@
             <div class="w-16 h-16 bg-cyan-400/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </div>
-            <h3 class="header-font text-2xl font-bold mb-2">Success</h3>
-            <p class="text-gray-400 mb-8">Your registration has been sent to the Google Sheet.</p>
+            <h3 class="header-font text-2xl font-bold mb-2">Registration Saved</h3>
+            <p class="text-gray-400 mb-8">Data has been synced to the Cloud and Google Sheets.</p>
             <button onclick="location.reload()" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase tracking-widest">Done</button>
         </div>
     </div>
@@ -253,9 +252,10 @@
 
         const form = document.getElementById('registrationForm');
         form.addEventListener('submit', async (e) => {
-            // No preventDefault here to allow the action to trigger the iframe post
+            // We allow the browser to naturally POST to the action URL (target=hidden_iframe)
+            // But we intercept to trigger the Modal and Firebase logic
             const btn = document.getElementById('submitBtn');
-            btn.innerText = "Syncing...";
+            btn.innerText = "Saving...";
             btn.disabled = true;
 
             const data = {
@@ -268,16 +268,16 @@
                 timestamp: new Date().toISOString()
             };
 
-            // Firebase backup
+            // 1. Firebase backup save
             try {
                 if (currentUser) {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), data);
                 }
-            } catch (error) {
-                console.error("Firebase save failed:", error);
+            } catch (err) {
+                console.error("Firebase error", err);
             }
 
-            // Immediately show success modal while iframe handles Google Sheet
+            // 2. Show the Success Modal immediately
             document.getElementById('successModal').classList.remove('hidden');
         });
 
