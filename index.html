@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -495,6 +495,478 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
             XLSX.writeFile(workbook, `VibeHack_Registrations.xlsx`);
+        };
+    </script>
+</body>
+</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Hackathon Poster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0a0a0c;
+        }
+        body {
+            background-color: var(--dark-bg);
+            font-family: 'Space Grotesk', sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+        .header-font {
+            font-family: 'Syncopate', sans-serif;
+            text-transform: uppercase;
+        }
+        .vibe-gradient {
+            background: linear-gradient(135deg, #00f2ff 0%, #bc13fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-dot {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(188, 19, 254, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+        select option {
+            background: #1a1a1a;
+            color: white;
+        }
+        .hidden { display: none; }
+        
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-10">
+
+    <div class="glow-dot top-0 left-0"></div>
+    <div class="glow-dot bottom-0 right-0"></div>
+
+    <div class="max-w-4xl w-full relative">
+        
+        <!-- SECTION 1: POSTER VIEW -->
+        <div id="posterPage" class="glass rounded-3xl p-8 md:p-16 border-t border-l border-white/20 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 opacity-10 text-9xl font-bold select-none">CODE</div>
+            
+            <div class="text-center mb-6">
+                <p class="tracking-[0.5em] text-sm md:text-base text-gray-400 font-light mb-2 uppercase">Dilkap Research Institute of Engineering</p>
+                <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-white/40 to-transparent mx-auto"></div>
+            </div>
+
+            <div class="text-center mb-12">
+                <h2 class="header-font text-lg md:text-xl tracking-widest text-cyan-400 mb-2">Organizing</h2>
+                <h1 class="header-font text-5xl md:text-8xl font-bold leading-none mb-4">
+                    VIBE <span class="vibe-gradient">CODING</span>
+                </h1>
+                <p class="text-xl md:text-2xl font-light tracking-wide text-gray-300">HACKATHON 2026</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="glass p-6 rounded-2xl text-center">
+                    <p class="text-xs text-cyan-400 uppercase mb-1">Date</p>
+                    <p class="text-2xl font-bold">01 APRIL</p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <p class="text-xs text-purple-400 uppercase mb-1">Vibe Check</p>
+                    <p class="text-2xl font-bold">09:00 AM</p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <p class="text-xs text-cyan-400 uppercase mb-1">Location</p>
+                    <p class="text-2xl font-bold">DRIOE LAB</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="space-y-4 max-w-sm">
+                    <p class="text-gray-400 italic">"Flow. Prompt. Deploy. Win."</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <button onclick="showPage('registerPage')" class="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-cyan-400 hover:scale-105 transition-all uppercase tracking-tighter">
+                        Register Now
+                    </button>
+                    <p onclick="openAuthModal()" class="text-[10px] text-gray-700 mt-4 cursor-pointer hover:text-gray-400">Admin Dashboard</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: REGISTRATION PAGE -->
+        <div id="registerPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
+            <button onclick="showPage('posterPage')" class="text-cyan-400 hover:text-white flex items-center gap-2 mb-8 group">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Back
+            </button>
+
+            <div class="mb-10">
+                <h2 class="header-font text-3xl font-bold mb-2">Registration <span class="vibe-gradient">Portal</span></h2>
+                <p class="text-gray-400 text-sm">One registration per student (Unique Email/Phone required).</p>
+                <div id="authStatus" class="mt-4 text-[10px] uppercase tracking-widest text-yellow-500 font-bold">
+                    Connecting to Cloud...
+                </div>
+            </div>
+
+            <form id="registrationForm" class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <input type="text" id="firstName" class="input-field" placeholder="First Name" required minlength="2">
+                    </div>
+                    <div>
+                        <input type="text" id="lastName" class="input-field" placeholder="Last Name" required minlength="2">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <input type="email" id="email" class="input-field" placeholder="Email Address" required>
+                    </div>
+                    <div>
+                        <input type="tel" id="phone" class="input-field" placeholder="10-Digit Mobile Number" pattern="[0-9]{10}" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <select id="branch" class="input-field" required>
+                        <option value="" disabled selected>Select Branch</option>
+                        <option value="CS">Computer Science</option>
+                        <option value="IT">Information Technology</option>
+                        <option value="EXTC">EXTC</option>
+                        <option value="MECH">Mechanical</option>
+                        <option value="CIVIL">Civil</option>
+                    </select>
+                    <select id="year" class="input-field" required>
+                        <option value="" disabled selected>Select Year</option>
+                        <option value="FE">First Year</option>
+                        <option value="SE">Second Year</option>
+                        <option value="TE">Third Year</option>
+                        <option value="BE">Final Year</option>
+                    </select>
+                </div>
+                
+                <div id="formErrorMessage" class="text-red-400 text-sm text-center hidden font-medium bg-red-400/10 py-3 rounded-lg border border-red-400/20"></div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white py-4 rounded-xl font-bold hover:opacity-90 transition-all uppercase">
+                    Submit Registration
+                </button>
+            </form>
+        </div>
+
+        <!-- SECTION 3: ADMIN DASHBOARD -->
+        <div id="adminPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                         <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
+                         <div class="h-2 w-2 rounded-full bg-green-500 pulse"></div>
+                    </div>
+                    <p class="text-gray-400 text-xs mt-1">Live Updates: <span id="regCount" class="text-white font-bold">0</span> entries</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="exportBtn" class="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white px-6 py-2 rounded-lg border border-green-600/30 transition-all text-sm font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        Export Excel
+                    </button>
+                    <button onclick="showPage('posterPage')" class="bg-white/10 px-4 py-2 rounded-lg text-sm">Close</button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-white/10 max-h-[500px] overflow-y-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest sticky top-0 backdrop-blur-md z-10">
+                        <tr>
+                            <th class="p-4">Student Name</th>
+                            <th class="p-4">Contact Info</th>
+                            <th class="p-4">Branch/Year</th>
+                            <th class="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div id="noData" class="text-center py-10 text-gray-500 hidden">No registrations yet.</div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[60] hidden">
+        <div class="glass p-10 rounded-3xl max-w-sm w-full text-center border-white/10">
+            <h3 class="header-font text-xl font-bold mb-6">Admin Access</h3>
+            <input type="password" id="adminPass" class="input-field text-center mb-4" placeholder="Enter PIN">
+            <div id="authError" class="text-red-400 text-xs mb-4 hidden">Incorrect Password</div>
+            <div class="flex gap-3">
+                <button onclick="closeAuthModal()" class="flex-1 bg-white/10 py-3 rounded-xl font-bold uppercase tracking-widest text-sm">Cancel</button>
+                <button onclick="verifyAdmin()" class="flex-1 bg-cyan-500 text-black py-3 rounded-xl font-bold uppercase tracking-widest text-sm">Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[100] hidden">
+        <div class="glass p-10 rounded-3xl max-w-sm text-center border-cyan-400/30">
+            <div class="w-16 h-16 bg-cyan-400/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <h3 class="header-font text-2xl font-bold mb-2 text-white">Verified!</h3>
+            <p class="text-gray-400 mb-8">Your registration is unique and has been saved to the cloud.</p>
+            <button id="closeSuccessBtn" class="w-full bg-cyan-400 text-black py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-colors">Done</button>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="deleteModal" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[70] hidden">
+        <div class="glass p-8 rounded-3xl max-w-xs w-full text-center border-red-500/20">
+            <h3 class="header-font text-lg font-bold mb-4 text-red-400">Confirm Delete?</h3>
+            <p class="text-gray-400 text-xs mb-6 text-balance">This will remove the student's registration from the database.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-white/10 py-3 rounded-xl text-xs font-bold uppercase">Cancel</button>
+                <button id="confirmDeleteBtn" class="flex-1 bg-red-600 text-white py-3 rounded-xl text-xs font-bold uppercase">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, Timestamp, doc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "AIzaSyAk3HlIlYCRi24ctsVo3wkZq9dqWLqFCqM",
+                authDomain: "registration-page-5025d.firebaseapp.com",
+                projectId: "registration-page-5025d",
+                storageBucket: "registration-page-5025d.firebasestorage.app",
+                messagingSenderId: "142199310593",
+                appId: "1:142199310593:web:a2cc72fa4d0ce3eb15b300",
+                measurementId: "G-JK512LQHFF"
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'registration-page-5025d';
+
+        let students = [];
+        let currentUser = null;
+        let unsubscribeLive = null;
+        
+        const ADMIN_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // PIN 1234
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                const status = document.getElementById('authStatus');
+                status.innerText = "Cloud Connection Secured";
+                status.classList.replace('text-yellow-500', 'text-green-500');
+                startLiveSync();
+            }
+        });
+
+        function startLiveSync() {
+            if (unsubscribeLive) unsubscribeLive();
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+            unsubscribeLive = onSnapshot(q, (snapshot) => {
+                students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                document.getElementById('regCount').innerText = students.length;
+                renderTable();
+            }, (err) => console.error("Sync Error:", err));
+        }
+
+        initAuth();
+
+        window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
+        window.closeAuthModal = () => {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('adminPass').value = '';
+        };
+
+        window.verifyAdmin = async () => {
+            const pin = document.getElementById('adminPass').value;
+            if (await sha256(pin) === ADMIN_HASH) {
+                closeAuthModal();
+                showPage('adminPage');
+            } else {
+                document.getElementById('authError').classList.remove('hidden');
+            }
+        };
+
+        const registrationForm = document.getElementById('registrationForm');
+        registrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('formErrorMessage');
+            
+            errorMsg.classList.add('hidden');
+            btn.innerText = "Verifying Uniqueness...";
+            btn.disabled = true;
+
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const phone = document.getElementById('phone').value.trim();
+
+            // Real-time duplicate check against local state (which is synced with server)
+            const isDuplicateEmail = students.some(s => s.email.toLowerCase() === email);
+            const isDuplicatePhone = students.some(s => s.phone === phone);
+
+            if (isDuplicateEmail || isDuplicatePhone) {
+                errorMsg.innerText = isDuplicateEmail ? "This Email is already registered." : "This Phone Number is already registered.";
+                errorMsg.classList.remove('hidden');
+                btn.innerText = "Submit Registration";
+                btn.disabled = false;
+                return;
+            }
+
+            const data = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: email,
+                phone: phone,
+                branch: document.getElementById('branch').value,
+                year: document.getElementById('year').value,
+                timestamp: Timestamp.now()
+            };
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), data);
+                registrationForm.reset();
+                btn.innerText = "Submit Registration";
+                btn.disabled = false;
+                document.getElementById('successModal').classList.remove('hidden');
+            } catch (err) {
+                btn.innerText = "Retry Submission";
+                btn.disabled = false;
+                alert("Error saving data. Please check connection.");
+            }
+        });
+
+        document.getElementById('closeSuccessBtn').onclick = () => {
+            document.getElementById('successModal').classList.add('hidden');
+            showPage('posterPage');
+        };
+
+        function renderTable() {
+            const tbody = document.getElementById('studentTableBody');
+            const noData = document.getElementById('noData');
+            tbody.innerHTML = '';
+            
+            if (students.length === 0) {
+                noData.classList.remove('hidden');
+                return;
+            }
+            
+            noData.classList.add('hidden');
+            // Sort by timestamp newest first
+            const sorted = [...students].sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            
+            sorted.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = "border-t border-white/5 hover:bg-white/5 transition-colors group";
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-bold text-white">${s.firstName} ${s.lastName}</div>
+                        <div class="text-[10px] text-gray-500 font-mono uppercase tracking-tighter">${s.id}</div>
+                    </td>
+                    <td class="p-4">
+                        <div class="text-cyan-400 font-medium">${s.email}</div>
+                        <div class="text-xs text-gray-400">${s.phone}</div>
+                    </td>
+                    <td class="p-4">
+                        <span class="bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-purple-500/20">${s.branch}</span>
+                        <div class="text-gray-500 mt-1 text-[10px]">${s.year}</div>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteEntry('${s.id}')" class="text-gray-600 hover:text-red-400 p-2 transition-colors opacity-0 group-hover:opacity-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.deleteEntry = (id) => {
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('hidden');
+            document.getElementById('confirmDeleteBtn').onclick = async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'registrations', id));
+                    modal.classList.add('hidden');
+                } catch(e) {
+                    alert("Delete failed. Auth required.");
+                }
+            };
+        };
+
+        window.closeDeleteModal = () => document.getElementById('deleteModal').classList.add('hidden');
+
+        window.showPage = (id) => {
+            ['posterPage', 'registerPage', 'adminPage'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        };
+
+        document.getElementById('exportBtn').onclick = () => {
+            if (!students.length) return;
+            const data = students.map(s => ({ 
+                Name: `${s.firstName} ${s.lastName}`, 
+                Email: s.email, 
+                Phone: s.phone, 
+                Branch: s.branch, 
+                Year: s.year,
+                RegDate: s.timestamp?.toDate().toLocaleString()
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Registrations");
+            XLSX.writeFile(wb, "VibeHack_Registrations.xlsx");
         };
     </script>
 </body>
