@@ -62,10 +62,29 @@
         }
         .hidden { display: none; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--neon-blue);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 md:p-10">
@@ -103,7 +122,7 @@
                 </div>
                 <div class="glass p-6 rounded-2xl text-center">
                     <p class="text-xs text-cyan-400 uppercase mb-1">Location</p>
-                    <p class="text-2xl font-bold">DREIMS</p>
+                    <p class="text-2xl font-bold">DRIOE LAB</p>
                 </div>
             </div>
 
@@ -129,23 +148,20 @@
 
             <div class="mb-10">
                 <h2 class="header-font text-3xl font-bold mb-2">Registration <span class="vibe-gradient">Portal</span></h2>
-                <p class="text-gray-400 text-sm">Automated data collection for Dilkap Hackathon 2026.</p>
-                <!-- Connection Status Indicator -->
-                <div id="authStatus" class="mt-4 text-[10px] uppercase tracking-widest text-yellow-500 font-bold">
-                    Connecting to Cloud...
-                </div>
-                <div id="authHint" class="hidden mt-2 p-3 bg-red-900/20 border border-red-500/30 rounded text-red-400 text-[10px]">
-                    HINT: Go to Firebase Console > Authentication > Settings > Sign-in Method and Enable "Anonymous".
+                <p class="text-gray-400 text-sm">Real-time cross-device synchronization enabled.</p>
+                <div id="authStatus" class="mt-4 text-[10px] uppercase tracking-widest text-yellow-500 font-bold flex items-center gap-2">
+                    <div class="h-1.5 w-1.5 rounded-full bg-yellow-500"></div>
+                    Establishing Cloud Socket...
                 </div>
             </div>
 
             <form id="registrationForm" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="text" id="firstName" class="input-field" placeholder="First Name" required>
-                    <input type="text" id="lastName" class="input-field" placeholder="Last Name" required>
+                    <input type="text" id="firstName" class="input-field" placeholder="First Name" required minlength="2">
+                    <input type="text" id="lastName" class="input-field" placeholder="Last Name" required minlength="2">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="email" id="email" class="input-field" placeholder="Email" required>
+                    <input type="email" id="email" class="input-field" placeholder="Email Address" required>
                     <input type="tel" id="phone" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -153,7 +169,7 @@
                         <option value="" disabled selected>Select Branch</option>
                         <option value="CS">Computer Science</option>
                         <option value="IT">Information Technology</option>
-                        <option value="EXTC">AI&ML</option>
+                        <option value="EXTC">EXTC</option>
                         <option value="MECH">Mechanical</option>
                         <option value="CIVIL">Civil</option>
                     </select>
@@ -165,6 +181,9 @@
                         <option value="BE">Final Year</option>
                     </select>
                 </div>
+                
+                <div id="formErrorMessage" class="text-red-400 text-sm text-center hidden font-medium bg-red-400/10 py-3 rounded-lg border border-red-400/20"></div>
+
                 <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white py-4 rounded-xl font-bold hover:opacity-90 transition-all uppercase">
                     Submit Registration
                 </button>
@@ -175,25 +194,27 @@
         <div id="adminPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <div>
-                    <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
-                    <p class="text-gray-400 text-xs mt-1">Real-time student database</p>
+                    <div class="flex items-center gap-2">
+                         <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
+                         <div class="h-2 w-2 rounded-full bg-green-500 pulse"></div>
+                    </div>
+                    <p class="text-gray-400 text-xs mt-1">Live Updates: <span id="regCount" class="text-white font-bold">0</span> students registered</p>
                 </div>
                 <div class="flex gap-3">
                     <button id="exportBtn" class="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white px-6 py-2 rounded-lg border border-green-600/30 transition-all text-sm font-bold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                        Export to Excel (.xlsx)
+                        Export Excel
                     </button>
                     <button onclick="showPage('posterPage')" class="bg-white/10 px-4 py-2 rounded-lg text-sm">Close</button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-xl border border-white/10">
+            <div class="overflow-x-auto rounded-xl border border-white/10 max-h-[500px] overflow-y-auto">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest">
+                    <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest sticky top-0 backdrop-blur-md z-10">
                         <tr>
-                            <th class="p-4">Name</th>
-                            <th class="p-4">Email</th>
-                            <th class="p-4">Phone</th>
+                            <th class="p-4">Student Name</th>
+                            <th class="p-4">Contact Info</th>
                             <th class="p-4">Branch/Year</th>
                             <th class="p-4 text-right">Actions</th>
                         </tr>
@@ -206,7 +227,7 @@
         </div>
     </div>
 
-    <!-- Admin Authentication Modal -->
+    <!-- Auth Modal -->
     <div id="authModal" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[60] hidden">
         <div class="glass p-10 rounded-3xl max-w-sm w-full text-center border-white/10">
             <h3 class="header-font text-xl font-bold mb-6">Admin Access</h3>
@@ -225,21 +246,9 @@
             <div class="w-16 h-16 bg-cyan-400/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </div>
-            <h3 class="header-font text-2xl font-bold mb-2">Success</h3>
-            <p class="text-gray-400 mb-8">Registration saved to cloud.</p>
-            <button id="closeSuccessBtn" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase tracking-widest">Done</button>
-        </div>
-    </div>
-
-    <!-- Confirm Delete Modal -->
-    <div id="deleteModal" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[70] hidden">
-        <div class="glass p-8 rounded-3xl max-w-xs w-full text-center border-red-500/20">
-            <h3 class="header-font text-lg font-bold mb-4 text-red-400">Confirm Delete?</h3>
-            <p class="text-gray-400 text-xs mb-6">This action is permanent and cannot be undone.</p>
-            <div class="flex gap-3">
-                <button onclick="closeDeleteModal()" class="flex-1 bg-white/10 py-3 rounded-xl text-xs font-bold uppercase">Cancel</button>
-                <button id="confirmDeleteBtn" class="flex-1 bg-red-600 text-white py-3 rounded-xl text-xs font-bold uppercase hover:bg-red-500">Delete</button>
-            </div>
+            <h3 class="header-font text-2xl font-bold mb-2 text-white">Submitted!</h3>
+            <p class="text-gray-400 mb-8">Data has been pushed to the central cloud database.</p>
+            <button id="closeSuccessBtn" class="w-full bg-cyan-400 text-black py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-colors">Done</button>
         </div>
     </div>
 
@@ -248,7 +257,6 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, Timestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase configuration
         const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
             ? JSON.parse(__firebase_config) 
             : {
@@ -264,60 +272,53 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'registration-page-5025d';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vibe-hack-2026';
 
         let students = [];
-        let currentUser = null;
-        let pendingDeleteId = null;
-        const statusEl = document.getElementById('authStatus');
-        
-        // Admin password "324687@" hashed with SHA-256 (one-way encryption)
-        const ADMIN_HASH = "03c4d3df0a118e0e002d6a4d97cba7e90f3d59b824a14d218fe20e9fe62934f4"; 
+        let unsubscribeLive = null;
+        const ADMIN_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // PIN 1234
 
         async function sha256(message) {
             const msgBuffer = new TextEncoder().encode(message);
             const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        const initAuth = async (retries = 3) => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (e) {
-                if (retries > 0) setTimeout(() => initAuth(retries - 1), 2000);
+        // 1. Core Auth & Sync Initialization
+        const init = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
             }
         };
 
         onAuthStateChanged(auth, (user) => {
-            currentUser = user;
             if (user) {
-                statusEl.innerText = "Cloud Connected";
-                statusEl.classList.replace('text-yellow-500', 'text-green-500');
+                const status = document.getElementById('authStatus');
+                status.innerHTML = '<div class="h-1.5 w-1.5 rounded-full bg-green-500 pulse"></div> Real-time Stream Online';
+                status.classList.replace('text-yellow-500', 'text-green-500');
                 
+                // 2. Persistent Listener for all devices
+                if (unsubscribeLive) unsubscribeLive();
                 const q = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
-                
-                onSnapshot(q, (snapshot) => {
+                unsubscribeLive = onSnapshot(q, (snapshot) => {
                     students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    document.getElementById('regCount').innerText = students.length;
                     renderTable();
-                }, (err) => {
-                    console.error("Firestore Error:", err);
-                });
+                }, (err) => console.error("Sync Error:", err));
             }
         });
 
-        initAuth();
+        init();
 
-        window.openAuthModal = () => {
-            document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('adminPass').focus();
+        // 3. UI Navigation
+        window.showPage = (id) => {
+            ['posterPage', 'registerPage', 'adminPage'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         };
 
+        window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
         window.closeAuthModal = () => {
             document.getElementById('authModal').classList.add('hidden');
             document.getElementById('adminPass').value = '';
@@ -325,10 +326,8 @@
         };
 
         window.verifyAdmin = async () => {
-            const input = document.getElementById('adminPass').value.trim();
-            if (!input) return;
-            const inputHash = await sha256(input);
-            if (inputHash === ADMIN_HASH) {
+            const pin = document.getElementById('adminPass').value;
+            if (await sha256(pin) === ADMIN_HASH) {
                 closeAuthModal();
                 showPage('adminPage');
             } else {
@@ -336,33 +335,60 @@
             }
         };
 
-        window.promptDelete = (id) => {
-            pendingDeleteId = id;
-            document.getElementById('deleteModal').classList.remove('hidden');
-        };
-
-        window.closeDeleteModal = () => {
-            pendingDeleteId = null;
-            document.getElementById('deleteModal').classList.add('hidden');
-        };
-
-        document.getElementById('confirmDeleteBtn').onclick = async () => {
-            if (!pendingDeleteId || !currentUser) return;
+        // 4. Form Submission with Cross-Device Validation
+        const registrationForm = document.getElementById('registrationForm');
+        registrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('formErrorMessage');
             
-            try {
-                const docRef = doc(db, `artifacts/${appId}/public/data/registrations`, pendingDeleteId);
-                await deleteDoc(docRef);
-                closeDeleteModal();
-            } catch (err) {
-                console.error("Delete failed:", err);
-                alert("Only authorized admin can delete records.");
-            }
-        };
+            errorMsg.classList.add('hidden');
+            btn.innerHTML = '<span class="spinner"></span> Syncing with Cloud...';
+            btn.disabled = true;
 
-        document.getElementById('adminPass').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') verifyAdmin();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const phone = document.getElementById('phone').value.trim();
+
+            // Check against live local snapshot (synced with Firestore)
+            const isDuplicate = students.some(s => s.email.toLowerCase() === email || s.phone === phone);
+
+            if (isDuplicate) {
+                errorMsg.innerText = "Student already registered with this Email or Phone.";
+                errorMsg.classList.remove('hidden');
+                btn.innerText = "Submit Registration";
+                btn.disabled = false;
+                return;
+            }
+
+            const payload = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: email,
+                phone: phone,
+                branch: document.getElementById('branch').value,
+                year: document.getElementById('year').value,
+                timestamp: Timestamp.now()
+            };
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), payload);
+                registrationForm.reset();
+                btn.innerText = "Submit Registration";
+                btn.disabled = false;
+                document.getElementById('successModal').classList.remove('hidden');
+            } catch (err) {
+                btn.innerText = "Retry Sync";
+                btn.disabled = false;
+                alert("Cloud disconnected. Please try again.");
+            }
         });
 
+        document.getElementById('closeSuccessBtn').onclick = () => {
+            document.getElementById('successModal').classList.add('hidden');
+            showPage('posterPage');
+        };
+
+        // 5. Admin Rendering
         function renderTable() {
             const tbody = document.getElementById('studentTableBody');
             const noData = document.getElementById('noData');
@@ -370,131 +396,53 @@
             
             if (students.length === 0) {
                 noData.classList.remove('hidden');
-            } else {
-                noData.classList.add('hidden');
-                const sorted = [...students].sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                
-                sorted.forEach(s => {
-                    const tr = document.createElement('tr');
-                    tr.className = "border-t border-white/5 hover:bg-white/5 transition-colors";
-                    tr.innerHTML = `
-                        <td class="p-4 font-bold">${s.firstName || ''} ${s.lastName || ''}</td>
-                        <td class="p-4 text-gray-400">${s.email || ''}</td>
-                        <td class="p-4 text-gray-400">${s.phone || ''}</td>
-                        <td class="p-4">
-                            <span class="bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded text-[10px] uppercase font-bold">${s.branch || ''}</span> 
-                            <span class="text-gray-500 ml-1">${s.year || ''}</span>
-                        </td>
-                        <td class="p-4 text-right">
-                            <button onclick="promptDelete('${s.id}')" class="text-red-500/50 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10" title="Delete Entry">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-        }
-
-        const registrationForm = document.getElementById('registrationForm');
-        registrationForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Check auth status
-            if (!currentUser) {
-                alert("Please wait for cloud connection...");
                 return;
             }
-
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerText;
             
-            btn.innerText = "Processing...";
-            btn.disabled = true;
-
-            const formData = {
-                firstName: document.getElementById('firstName').value.trim(),
-                lastName: document.getElementById('lastName').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                branch: document.getElementById('branch').value,
-                year: document.getElementById('year').value,
-                timestamp: Timestamp.now()
-            };
-
-            try {
-                const registrationsRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
-                console.log('Submitting registration to', registrationsRef.path, 'as user', currentUser?.uid || 'anonymous');
-                const savePromise = addDoc(registrationsRef, formData);
-                const result = await Promise.race([
-                    savePromise,
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore write timed out (8s)')), 8000))
-                ]);
-                console.log('Saved document:', result.id);
-
-                btn.innerText = originalText;
-                btn.disabled = false;
-                document.getElementById('successModal').classList.remove('hidden');
-                registrationForm.reset();
-
-            } catch (err) {
-                console.error('Submission error:', err);
-
-                // fallback to free API if firestore fails
-                try {
-                    const fallback = await fetch('https://jsonplaceholder.typicode.com/posts', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
-                    });
-                    if (fallback.ok) {
-                        console.log('Fallback API success');
-                        btn.innerText = originalText;
-                        btn.disabled = false;
-                        document.getElementById('successModal').classList.remove('hidden');
-                        registrationForm.reset();
-                        return;
-                    }
-                    console.warn('Fallback API failed status', fallback.status);
-                } catch (fallbackErr) {
-                    console.error('Fallback API error:', fallbackErr);
-                }
-
-                btn.innerText = originalText;
-                btn.disabled = false;
-                if (err.code === 'permission-denied') {
-                    document.getElementById('authHint').classList.remove('hidden');
-                }
-                const errorMsg = err.message || 'Unknown error';
-                alert(`Registration failed: ${errorMsg}. Check console.`);
-            }
-        });
-
-        // Close success modal logic
-        document.getElementById('closeSuccessBtn').onclick = () => {
-            document.getElementById('successModal').classList.add('hidden');
-            window.showPage('posterPage');
-        };
-
-        window.showPage = (id) => {
-            ['posterPage', 'registerPage', 'adminPage'].forEach(p => {
-                const el = document.getElementById(p);
-                if (el) el.classList.add('hidden');
+            noData.classList.add('hidden');
+            const sorted = [...students].sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            
+            sorted.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = "border-t border-white/5 hover:bg-white/5 transition-colors group";
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-bold text-white">${s.firstName} ${s.lastName}</div>
+                        <div class="text-[9px] text-gray-600 font-mono uppercase">${s.id.substring(0,8)}...</div>
+                    </td>
+                    <td class="p-4">
+                        <div class="text-cyan-400 text-xs">${s.email}</div>
+                        <div class="text-[10px] text-gray-500">${s.phone}</div>
+                    </td>
+                    <td class="p-4">
+                        <span class="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[9px] text-white font-bold uppercase">${s.branch}</span>
+                        <div class="text-[9px] text-gray-600 mt-1 uppercase">${s.year}</div>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteEntry('${s.id}')" class="text-gray-700 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
-            const target = document.getElementById(id);
-            if (target) target.classList.remove('hidden');
+        }
+
+        window.deleteEntry = async (id) => {
+            if (confirm("Permanently delete this record?")) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'registrations', id));
+            }
         };
 
         document.getElementById('exportBtn').onclick = () => {
-            if (students.length === 0) return;
-            const excelData = students.map(({ id, timestamp, ...rest }) => ({
-                ...rest,
-                Registered_At: timestamp?.toDate ? timestamp.toDate().toLocaleString() : ''
+            if (!students.length) return;
+            const data = students.map(s => ({ 
+                Name: `${s.firstName} ${s.lastName}`, Email: s.email, Phone: s.phone, Branch: s.branch, Year: s.year 
             }));
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
-            XLSX.writeFile(workbook, `VibeHack_Registrations.xlsx`);
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Records");
+            XLSX.writeFile(wb, "Hackathon_Live_Data.xlsx");
         };
     </script>
 </body>
