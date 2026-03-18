@@ -132,17 +132,17 @@
             </div>
 
             <!-- ACTION URL UPDATED TO YOUR SCRIPT URL -->
-            <form id="registrationForm" action="https://script.google.com/macros/s/AKfycbx7vCep4Cl4r9YWrpTrtUiIY3CK2xukmraOx0gdbRiwzYM-FTfe8Nt6uNa30YDyIeQyIg/exec" method="POST" target="hidden_iframe" class="space-y-5">
+            <form id="registrationForm" action="https://sheetdb.io/api/v1/m1d4w5urnx5ly" method="POST" target="hidden_iframe" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="text" id="firstName" name="firstName" class="input-field" placeholder="First Name" required>
-                    <input type="text" id="lastName" name="lastName" class="input-field" placeholder="Last Name" required>
+                    <input type="text" id="firstName" name="data[firstName]" class="input-field" placeholder="First Name" required>
+                    <input type="text" id="lastName" name="data[lastName]" class="input-field" placeholder="Last Name" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="email" id="email" name="email" class="input-field" placeholder="Email" required>
-                    <input type="tel" id="phone" name="phone" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
+                    <input type="email" id="email" name="data[email]" class="input-field" placeholder="Email" required>
+                    <input type="tel" id="phone" name="data[phone]" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <select id="branch" name="branch" class="input-field" required>
+                    <select id="branch" name="data[branch]" class="input-field" required>
                         <option value="" disabled selected>Select Branch</option>
                         <option value="CS">Computer Science</option>
                         <option value="IT">Information Technology</option>
@@ -151,7 +151,7 @@
                         <option value="CIVIL">Civil</option>
                         <option value="CIVIL">Electrical</option>
                     </select>
-                    <select id="year" name="year" class="input-field" required>
+                    <select id="year" name="data[year]" class="input-field" required>
                         <option value="" disabled selected>Select Year</option>
                         <option value="FE">First Year</option>
                         <option value="SE">Second Year</option>
