@@ -6,6 +6,11 @@
     <title>Vibe Coding Hackathon Registration Form</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
     <style>
         :root {
             --neon-blue: #00f2ff;
@@ -53,6 +58,11 @@
         .input-field:focus {
             border-color: var(--neon-blue);
             box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+        .input-field:read-only {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-color: rgba(255,255,255,0.05);
         }
         select option {
             background: #1a1a1a;
@@ -105,11 +115,13 @@
 
             <div class="flex flex-col md:flex-row justify-between items-center gap-8">
                 <div class="space-y-4 max-w-sm">
-                    <p class="text-gray-400 italic">"Flow. Prompt. Deploy. Win."</p>
+                    <p class="text-gray-400 italic">"Verify with Google to Register."</p>
+                    <p id="envWarning" class="text-[10px] text-yellow-500 hidden">Note: Use a standard browser for Google Sign-in.</p>
                 </div>
                 <div class="text-center md:text-right">
-                    <button onclick="showPage('registerPage')" class="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-cyan-400 hover:scale-105 transition-all uppercase tracking-tighter">
-                        Register Now
+                    <button id="authBtn" onclick="handleGoogleSignIn()" class="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-cyan-400 hover:scale-105 transition-all uppercase tracking-tighter flex items-center gap-3">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.27.81-.57z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Sign in with Google
                     </button>
                     <p onclick="openAuthModal()" class="text-[10px] text-gray-700 mt-4 cursor-pointer hover:text-gray-400">Admin Dashboard</p>
                 </div>
@@ -118,28 +130,26 @@
 
         <!-- SECTION 2: REGISTRATION PAGE -->
         <div id="registerPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
-            <button onclick="showPage('posterPage')" class="text-cyan-400 hover:text-white flex items-center gap-2 mb-8 group">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                Back
+            <button onclick="logout()" class="text-red-400 hover:text-white flex items-center gap-2 mb-8 group text-sm">
+                Sign Out
             </button>
 
             <div class="mb-10">
                 <h2 class="header-font text-3xl font-bold mb-2">Registration <span class="vibe-gradient">Portal</span></h2>
-                <p class="text-gray-400 text-sm">Fill in your details to secure your spot.</p>
+                <p class="text-gray-400 text-sm">Verified Profile: <span id="userDisplayName" class="text-cyan-400"></span></p>
             </div>
 
             <form id="registrationForm" action="https://sheetdb.io/api/v1/m1d4w5urnx5ly" method="POST" target="hidden_iframe" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="text" id="firstName" name="data[firstName]" class="input-field" placeholder="First Name" required>
-                    <input type="text" id="lastName" name="data[lastName]" class="input-field" placeholder="Last Name" required>
+                    <input type="text" id="firstName" name="data[firstName]" class="input-field" placeholder="First Name" required readonly>
+                    <input type="text" id="lastName" name="data[lastName]" class="input-field" placeholder="Last Name" required readonly>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="email" id="email" name="data[email]" class="input-field" placeholder="Email" required>
+                    <input type="email" id="email" name="data[email]" class="input-field" placeholder="Email" required readonly>
                     <input type="tel" id="phone" name="data[phone]" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                    <select id="branch" name="data[Game]" class="input-field" required>
+                    <select id="game" name="data[game]" class="input-field" required>
                         <option value="" disabled selected>Select Game</option>
                         <option value="BGMI">BGMI</option>
                         <option value="TECHNICAL POSTER PRESENTATION">TECHNICAL POSTER PRESENTATION</option>
@@ -153,7 +163,6 @@
                         <option value="REEL MAKING COMPETETION">REEL MAKING COMPETETION</option>
                     </select>
 
-
                     <select id="branch" name="data[branch]" class="input-field" required>
                         <option value="" disabled selected>Select Branch</option>
                         <option value="CS">Computer Science</option>
@@ -163,6 +172,8 @@
                         <option value="CIVIL">Civil</option>
                         <option value="Electrical">Electrical</option>
                     </select>
+                </div>
+                <div class="grid grid-cols-1 gap-5">
                     <select id="year" name="data[year]" class="input-field" required>
                         <option value="" disabled selected>Select Year</option>
                         <option value="FE">First Year</option>
@@ -177,7 +188,7 @@
             </form>
         </div>
 
-        <!-- SECTION 3: ADMIN DASHBOARD (Mock for now without Firebase) -->
+        <!-- SECTION 3: ADMIN DASHBOARD -->
         <div id="adminPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
@@ -189,13 +200,13 @@
                         <tr>
                             <th class="p-4">Name</th>
                             <th class="p-4">Email</th>
-                            <th class="p-4">Games</th>
-                            <th class="p-4">Branch/Year</th>
+                            <th class="p-4">Game</th>
+                            <th class="p-4">Branch</th>
                         </tr>
                     </thead>
                     <tbody id="studentTableBody">
                         <tr>
-                            <td colspan="3" class="p-4 text-center text-gray-500 italic">Please check Google Sheets for live data.</td>
+                            <td colspan="4" class="p-4 text-center text-gray-500 italic">Please check Google Sheets for live data.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -228,13 +239,76 @@
     </div>
 
     <script>
+        // --- 1. FIREBASE CONFIGURATION ---
+        // IMPORTANT: Ensure "localhost" or your actual domain is added to "Authorized Domains" 
+        // in Firebase Console > Authentication > Settings.
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        // --- 2. AUTHENTICATION LOGIC ---
+        async function handleGoogleSignIn() {
+            try {
+                // If in a preview environment or iframe, popup might fail. 
+                // Using signInWithPopup but catching common environment errors.
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                fillUserForm(user);
+            } catch (error) {
+                console.error("Auth Error:", error);
+                
+                // Detailed environment error handling
+                if (error.code === 'auth/operation-not-supported-in-this-environment') {
+                    alert("Google Sign-in is blocked in this preview window. Please host the file on a web server (http/https) to enable authentication.");
+                    document.getElementById('envWarning').classList.remove('hidden');
+                } else if (error.code === 'auth/popup-blocked') {
+                    alert("Popup blocked by browser. Please enable popups for this site.");
+                } else {
+                    alert("Sign-in failed: " + error.message);
+                }
+            }
+        }
+
+        function fillUserForm(user) {
+            document.getElementById('email').value = user.email;
+            
+            // Split Display Name into First and Last
+            const nameParts = (user.displayName || "").split(" ");
+            document.getElementById('firstName').value = nameParts[0] || "";
+            document.getElementById('lastName').value = nameParts.slice(1).join(" ") || "";
+            
+            document.getElementById('userDisplayName').innerText = user.displayName || user.email;
+            
+            // Move to registration page
+            showPage('registerPage');
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                location.reload();
+            });
+        }
+
+        // --- 3. PAGE & FORM LOGIC ---
         const form = document.getElementById('registrationForm');
         form.addEventListener('submit', (e) => {
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Saving...";
             btn.disabled = true;
 
-            // Show the Success Modal immediately while the iframe handles the Google Sheet POST
+            // Show the Success Modal immediately
             document.getElementById('successModal').classList.remove('hidden');
         });
 
@@ -242,6 +316,7 @@
             ['posterPage', 'registerPage', 'adminPage'].forEach(p => document.getElementById(p).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         };
+        
         window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
         window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
         window.verifyAdmin = () => {
@@ -249,6 +324,13 @@
                 closeAuthModal(); showPage('adminPage');
             }
         };
+
+        // On Load check
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                fillUserForm(user);
+            }
+        });
     </script>
 </body>
 </html>
