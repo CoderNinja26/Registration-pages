@@ -233,7 +233,8 @@
             </div>
             <h3 class="header-font text-2xl font-bold mb-2">Registration Saved</h3>
             <p class="text-gray-400 mb-8">Data has been synced to Google Sheets.</p>
-            <button onclick="location.reload()" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase tracking-widest">Done</button>
+            <!-- Changed onclick from location.reload() to closeSuccessModal() -->
+            <button onclick="closeSuccessModal()" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase tracking-widest">Done</button>
         </div>
     </div>
 
@@ -265,12 +266,8 @@
                 fillUserForm(user);
             } catch (error) {
                 console.error("Auth Error Details:", error);
-                
-                // Specific troubleshooting for API Key issues
-                if (error.code === 'auth/api-key-not-valid') {
-                    alert("Firebase Error: The API Key provided is invalid. Please double-check your Firebase Console settings.");
-                } else if (error.code === 'auth/operation-not-supported-in-this-environment') {
-                    alert("Sign-in is blocked. Ensure this page is running on a valid domain and that domain is added to 'Authorized Domains' in Firebase Console.");
+                if (error.code === 'auth/unauthorized-domain') {
+                    alert("DOMAIN ERROR: Add this domain to Firebase Console > Auth > Settings.");
                 } else {
                     alert("Sign-in failed: " + error.message);
                 }
@@ -279,11 +276,9 @@
 
         function fillUserForm(user) {
             document.getElementById('email').value = user.email;
-            
             const nameParts = (user.displayName || "").split(" ");
             document.getElementById('firstName').value = nameParts[0] || "";
             document.getElementById('lastName').value = nameParts.slice(1).join(" ") || "";
-            
             document.getElementById('userDisplayName').innerText = user.displayName || user.email;
             showPage('registerPage');
         }
@@ -300,8 +295,23 @@
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Saving...";
             btn.disabled = true;
+            // Success modal appears. Hidden iframe handles the actual submission in the background.
             document.getElementById('successModal').classList.remove('hidden');
         });
+
+        window.closeSuccessModal = () => {
+            // Hide modal
+            document.getElementById('successModal').classList.add('hidden');
+            // Reset button
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Submit Registration";
+            btn.disabled = false;
+            // Clear only the fields that aren't auto-filled
+            document.getElementById('phone').value = "";
+            document.getElementById('game').selectedIndex = 0;
+            document.getElementById('branch').selectedIndex = 0;
+            document.getElementById('year').selectedIndex = 0;
+        };
 
         window.showPage = (id) => {
             ['posterPage', 'registerPage', 'adminPage'].forEach(p => document.getElementById(p).classList.add('hidden'));
