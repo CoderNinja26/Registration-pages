@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Using Compat version for easier single-file integration) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
@@ -116,7 +116,6 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-8">
                 <div class="space-y-4 max-w-sm">
                     <p class="text-gray-400 italic">"Verify with Google to Register."</p>
-                    <p id="envWarning" class="text-[10px] text-yellow-500 hidden">Note: Use a standard browser for Google Sign-in.</p>
                 </div>
                 <div class="text-center md:text-right">
                     <button id="authBtn" onclick="handleGoogleSignIn()" class="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-cyan-400 hover:scale-105 transition-all uppercase tracking-tighter flex items-center gap-3">
@@ -239,16 +238,16 @@
     </div>
 
     <script>
-        // --- 1. FIREBASE CONFIGURATION ---
-        // IMPORTANT: Ensure "localhost" or your actual domain is added to "Authorized Domains" 
-        // in Firebase Console > Authentication > Settings.
+        // --- 1. FIREBASE CONFIGURATION (Updated with your real credentials) ---
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyAk3HlIlYCRi24ctsVo3wkZq9dqWLqFCqM",
+            authDomain: "registration-page-5025d.firebaseapp.com",
+            databaseURL: "https://registration-page-5025d-default-rtdb.firebaseio.com",
+            projectId: "registration-page-5025d",
+            storageBucket: "registration-page-5025d.firebasestorage.app",
+            messagingSenderId: "142199310593",
+            appId: "1:142199310593:web:a2cc72fa4d0ce3eb15b300",
+            measurementId: "G-JK512LQHFF"
         };
         
         // Initialize Firebase
@@ -261,20 +260,13 @@
         // --- 2. AUTHENTICATION LOGIC ---
         async function handleGoogleSignIn() {
             try {
-                // If in a preview environment or iframe, popup might fail. 
-                // Using signInWithPopup but catching common environment errors.
                 const result = await auth.signInWithPopup(provider);
                 const user = result.user;
                 fillUserForm(user);
             } catch (error) {
                 console.error("Auth Error:", error);
-                
-                // Detailed environment error handling
                 if (error.code === 'auth/operation-not-supported-in-this-environment') {
-                    alert("Google Sign-in is blocked in this preview window. Please host the file on a web server (http/https) to enable authentication.");
-                    document.getElementById('envWarning').classList.remove('hidden');
-                } else if (error.code === 'auth/popup-blocked') {
-                    alert("Popup blocked by browser. Please enable popups for this site.");
+                    alert("Authentication is blocked in this environment. Please ensure you are running this from a web server (http/https) and have added the domain to Firebase Authorized Domains.");
                 } else {
                     alert("Sign-in failed: " + error.message);
                 }
@@ -325,7 +317,7 @@
             }
         };
 
-        // On Load check
+        // Listen for Auth State to keep session alive
         auth.onAuthStateChanged(user => {
             if (user) {
                 fillUserForm(user);
