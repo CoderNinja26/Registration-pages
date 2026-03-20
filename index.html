@@ -244,14 +244,19 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Replace these with your actual Firebase project config from Firebase Console
+        /** * IMPORTANT: To fix the "Authentication failed" error, you MUST:
+         * 1. Go to Firebase Console -> Project Settings -> General -> Your Apps
+         * 2. Copy the config object below.
+         * 3. Go to Authentication -> Sign-in Method -> Enable Google.
+         * 4. Add your current domain (e.g. your-site.web.app) to "Authorized Domains".
+         */
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "PASTE_YOUR_API_KEY_HERE",
+            authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "PASTE_YOUR_PROJECT_ID",
+            storageBucket: "PASTE_YOUR_PROJECT_ID.firebasestorage.app",
+            messagingSenderId: "PASTE_YOUR_SENDER_ID",
+            appId: "PASTE_YOUR_APP_ID"
         };
 
         // Initialize Firebase
@@ -263,9 +268,16 @@
 
         // Sign In Function
         loginBtn.onclick = async () => {
+            if (firebaseConfig.apiKey === "PASTE_YOUR_API_KEY_HERE") {
+                alert("Developer Note: Please configure the Firebase Config in the script section of this file!");
+                return;
+            }
+
             try {
                 loginBtn.disabled = true;
                 loginBtn.innerText = "Connecting...";
+                
+                // Using popup for better compatibility in Canvas/iframes
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 
@@ -281,8 +293,19 @@
 
                 window.showPage('registerPage');
             } catch (error) {
-                console.error("Auth Error:", error);
-                alert("Authentication failed. Please check your Firebase Config or Browser settings.");
+                console.error("Auth Error Code:", error.code);
+                console.error("Auth Error Message:", error.message);
+                
+                let errorMsg = "Authentication failed. ";
+                if (error.code === 'auth/popup-blocked') {
+                    errorMsg += "The sign-in popup was blocked by your browser.";
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    errorMsg += "This domain is not authorized in your Firebase Console.";
+                } else {
+                    errorMsg += "Please check your Firebase Config or Browser settings.";
+                }
+                
+                alert(errorMsg);
                 loginBtn.disabled = false;
                 loginBtn.innerText = "Continue with Google";
             }
