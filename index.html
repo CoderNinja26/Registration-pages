@@ -242,23 +242,18 @@
     <!-- Firebase SDK Imports (Modular) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        /** * IMPORTANT: To fix the "Authentication failed" error, you MUST:
-         * 1. Go to Firebase Console -> Project Settings -> General -> Your Apps
-         * 2. Copy the config object below.
-         * 3. Go to Authentication -> Sign-in Method -> Enable Google.
-         * 4. Add your current domain (e.g. your-site.web.app) to "Authorized Domains".
-         */
+        // Your Updated Firebase Configuration
         const firebaseConfig = {
-           apiKey: "AIzaSyAk3HlIlYCRi24ctsVo3wkZq9dqWLqFCqM",
-              authDomain: "registration-page-5025d.firebaseapp.com",
-              databaseURL: "https://registration-page-5025d-default-rtdb.firebaseio.com",
-              projectId: "registration-page-5025d",
-              storageBucket: "registration-page-5025d.firebasestorage.app",
-              messagingSenderId: "142199310593",
-              appId: "1:142199310593:web:a2cc72fa4d0ce3eb15b300",
-              measurementId: "G-JK512LQHFF"
+            apiKey: "AIzaSyAk3HlIlYCRi24ctsVo3wkZq9dqWLqFCqM",
+            authDomain: "registration-page-5025d.firebaseapp.com",
+            databaseURL: "https://registration-page-5025d-default-rtdb.firebaseio.com",
+            projectId: "registration-page-5025d",
+            storageBucket: "registration-page-5025d.firebasestorage.app",
+            messagingSenderId: "142199310593",
+            appId: "1:142199310593:web:a2cc72fa4d0ce3eb15b300",
+            measurementId: "G-JK512LQHFF"
         };
 
         // Initialize Firebase
@@ -270,25 +265,20 @@
 
         // Sign In Function
         loginBtn.onclick = async () => {
-            if (firebaseConfig.apiKey === "PASTE_YOUR_API_KEY_HERE") {
-                alert("Developer Note: Please configure the Firebase Config in the script section of this file!");
-                return;
-            }
-
             try {
                 loginBtn.disabled = true;
                 loginBtn.innerText = "Connecting...";
                 
-                // Using popup for better compatibility in Canvas/iframes
+                // Using popup for authentication
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 
-                // Populate Form
+                // Populate Form with Verified Data
                 document.getElementById('verifiedEmail').value = user.email;
                 document.getElementById('emailPlaceholder').value = user.email;
                 document.getElementById('displayEmail').innerText = user.email;
                 
-                // Extract Names
+                // Auto-fill names from Google Profile
                 const nameParts = (user.displayName || "").split(" ");
                 document.getElementById('firstName').value = nameParts[0] || "";
                 document.getElementById('lastName').value = nameParts.slice(1).join(" ") || "";
@@ -300,11 +290,13 @@
                 
                 let errorMsg = "Authentication failed. ";
                 if (error.code === 'auth/popup-blocked') {
-                    errorMsg += "The sign-in popup was blocked by your browser.";
+                    errorMsg += "Please allow popups for this site.";
                 } else if (error.code === 'auth/unauthorized-domain') {
-                    errorMsg += "This domain is not authorized in your Firebase Console.";
+                    errorMsg += "Domain not authorized in Firebase Console.";
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMsg += "Google sign-in is not enabled in Firebase.";
                 } else {
-                    errorMsg += "Please check your Firebase Config or Browser settings.";
+                    errorMsg += "Check your Firebase project settings.";
                 }
                 
                 alert(errorMsg);
@@ -342,9 +334,10 @@
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Processing...";
             btn.disabled = true;
+            // The hidden iframe handles the SheetDB POST request
             setTimeout(() => {
                 document.getElementById('successModal').classList.remove('hidden');
-            }, 800);
+            }, 1000);
         });
     </script>
 </body>
