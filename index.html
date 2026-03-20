@@ -6,6 +6,7 @@
     <title>Vibe Coding Hackathon Registration</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --neon-blue: #00f2ff;
@@ -54,11 +55,33 @@
             border-color: var(--neon-blue);
             box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
         }
+        .input-field:read-only {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
         select option {
             background: #1a1a1a;
             color: white;
         }
         .hidden { display: none; }
+
+        .btn-google {
+            background: white;
+            color: #1f2937;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
+        }
+        .btn-google:hover {
+            background: #f9fafb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 md:p-10">
@@ -66,7 +89,7 @@
     <div class="glow-dot top-0 left-0"></div>
     <div class="glow-dot bottom-0 right-0"></div>
 
-    <!-- Hidden Iframe for silent submission -->
+    <!-- Hidden Iframe for silent submission to SheetDB -->
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
     <div class="max-w-4xl w-full relative">
@@ -104,12 +127,13 @@
             </div>
 
             <div class="flex flex-col md:flex-row justify-between items-center gap-8">
-                <div class="space-y-4 max-w-sm">
-                    <p class="text-gray-400 italic">"Join the revolution. Register below."</p>
+                <div class="space-y-4 max-w-sm text-center md:text-left">
+                    <p class="text-gray-400 italic">"Authenticate with Firebase to secure your registration slot."</p>
                 </div>
                 <div class="text-center md:text-right">
-                    <button onclick="showPage('registerPage')" class="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-cyan-400 hover:scale-105 transition-all uppercase tracking-tighter">
-                        Register Now
+                    <button id="loginBtn" class="btn-google mx-auto md:ml-auto">
+                        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        Continue with Google
                     </button>
                     <p onclick="openAuthModal()" class="text-[10px] text-gray-700 mt-4 cursor-pointer hover:text-gray-400">Admin Dashboard</p>
                 </div>
@@ -118,24 +142,26 @@
 
         <!-- SECTION 2: REGISTRATION PAGE -->
         <div id="registerPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
-            <button onclick="showPage('posterPage')" class="text-cyan-400 hover:text-white flex items-center gap-2 mb-8 group">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                Back
+            <button onclick="logout()" class="text-red-400 hover:text-white flex items-center gap-2 mb-8 group text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign Out
             </button>
 
             <div class="mb-10">
                 <h2 class="header-font text-3xl font-bold mb-2">Registration <span class="vibe-gradient">Portal</span></h2>
-                <p class="text-gray-400 text-sm">Secure your spot in the competition.</p>
+                <p class="text-gray-400 text-sm">Verified Email: <span id="displayEmail" class="text-cyan-400 font-bold"></span></p>
             </div>
 
             <form id="registrationForm" action="https://sheetdb.io/api/v1/m1d4w5urnx5ly" method="POST" target="hidden_iframe" class="space-y-5">
+                <input type="hidden" id="verifiedEmail" name="data[email]">
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="text" name="data[firstName]" class="input-field" placeholder="First Name" required>
-                    <input type="text" name="data[lastName]" class="input-field" placeholder="Last Name" required>
+                    <input type="text" id="firstName" name="data[firstName]" class="input-field" placeholder="First Name" required>
+                    <input type="text" id="lastName" name="data[lastName]" class="input-field" placeholder="Last Name" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="email" name="data[email]" class="input-field" placeholder="Email Address" required>
-                    <input type="tel" name="data[phone]" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
+                    <input type="email" id="emailPlaceholder" class="input-field" placeholder="Email" readonly>
+                    <input type="tel" name="data[phone]" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required title="10-digit number only">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <select name="data[Game]" class="input-field" required>
@@ -176,7 +202,7 @@
             </form>
         </div>
 
-        <!-- SECTION 3: ADMIN DASHBOARD (Check SheetDB/Google Sheets for data) -->
+        <!-- SECTION 3: ADMIN DASHBOARD -->
         <div id="adminPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h2 class="header-font text-2xl font-bold">Admin <span class="vibe-gradient">Dashboard</span></h2>
@@ -184,7 +210,7 @@
             </div>
             <div class="text-center py-10 glass rounded-xl border-dashed border-white/20">
                 <p class="text-gray-400 italic">Registration data is synced directly to your linked Google Sheet.</p>
-                <p class="text-xs mt-2 text-cyan-400">Refer to SheetDB Dashboard for live logs.</p>
+                <p class="text-xs mt-2 text-cyan-400">Check SheetDB for live logs.</p>
             </div>
         </div>
     </div>
@@ -213,24 +239,70 @@
         </div>
     </div>
 
-    <script>
-        const form = document.getElementById('registrationForm');
-        form.addEventListener('submit', () => {
-            const btn = document.getElementById('submitBtn');
-            btn.innerText = "Processing...";
-            btn.disabled = true;
-            
-            // Show success modal immediately as the iframe handles the request
-            setTimeout(() => {
-                document.getElementById('successModal').classList.remove('hidden');
-            }, 500);
-        });
+    <!-- Firebase SDK Imports (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Replace these with your actual Firebase project config from Firebase Console
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const loginBtn = document.getElementById('loginBtn');
+
+        // Sign In Function
+        loginBtn.onclick = async () => {
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerText = "Connecting...";
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // Populate Form
+                document.getElementById('verifiedEmail').value = user.email;
+                document.getElementById('emailPlaceholder').value = user.email;
+                document.getElementById('displayEmail').innerText = user.email;
+                
+                // Extract Names
+                const nameParts = (user.displayName || "").split(" ");
+                document.getElementById('firstName').value = nameParts[0] || "";
+                document.getElementById('lastName').value = nameParts.slice(1).join(" ") || "";
+
+                window.showPage('registerPage');
+            } catch (error) {
+                console.error("Auth Error:", error);
+                alert("Authentication failed. Please check your Firebase Config or Browser settings.");
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Continue with Google";
+            }
+        };
+
+        // Sign Out Function
+        window.logout = async () => {
+            await signOut(auth);
+            location.reload();
+        };
+
+        // UI Helpers
         window.showPage = (id) => {
-            ['posterPage', 'registerPage', 'adminPage'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            ['posterPage', 'registerPage', 'adminPage'].forEach(p => {
+                const el = document.getElementById(p);
+                if(el) el.classList.add('hidden');
+            });
             document.getElementById(id).classList.remove('hidden');
         };
-        
+
         window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
         window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
         window.verifyAdmin = () => {
@@ -238,6 +310,17 @@
                 closeAuthModal(); showPage('adminPage');
             }
         };
+
+        // Handle Form Submission
+        const form = document.getElementById('registrationForm');
+        form.addEventListener('submit', () => {
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            setTimeout(() => {
+                document.getElementById('successModal').classList.remove('hidden');
+            }, 800);
+        });
     </script>
 </body>
 </html>
