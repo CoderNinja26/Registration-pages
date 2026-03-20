@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDKs (Using Compat version for easier single-file integration) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
@@ -116,6 +116,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-8">
                 <div class="space-y-4 max-w-sm">
                     <p class="text-gray-400 italic">"Verify with Google to Register."</p>
+                    <p id="envWarning" class="text-[10px] text-yellow-500 hidden">Note: Use a standard browser for Google Sign-in.</p>
                 </div>
                 <div class="text-center md:text-right">
                     <button id="authBtn" onclick="handleGoogleSignIn()" class="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-cyan-400 hover:scale-105 transition-all uppercase tracking-tighter flex items-center gap-3">
@@ -148,7 +149,7 @@
                     <input type="tel" id="phone" name="data[phone]" class="input-field" placeholder="10-Digit Mobile" pattern="[0-9]{10}" required>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <select id="game" name="data[Game]" class="input-field" required>
+                    <select id="game" name="data[game]" class="input-field" required>
                         <option value="" disabled selected>Select Game</option>
                         <option value="BGMI">BGMI</option>
                         <option value="TECHNICAL POSTER PRESENTATION">TECHNICAL POSTER PRESENTATION</option>
@@ -186,6 +187,53 @@
                 </button>
             </form>
         </div>
+
+
+
+        <div id="buttons">
+  <google-pay-button environment="TEST" button-type="short" button-color="black"></google-pay-button>
+</div>
+<script type="module">
+  import './node_modules/@google-pay/button-element/dist/index.js';
+
+  const button = document.querySelector('google-pay-button');
+  button.paymentRequest = {
+    apiVersion: 2,
+    apiVersionMinor: 0,
+    allowedPaymentMethods: [
+      {
+        type: 'CARD',
+        parameters: {
+          allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+          allowedCardNetworks: ['MASTERCARD', 'VISA'],
+          billingAddressRequired: true,
+        },
+        tokenizationSpecification: {
+          type: 'PAYMENT_GATEWAY',
+          parameters: {
+            gateway: 'example',
+            gatewayMerchantId: 'exampleGatewayMerchantId',
+          },
+        },
+      },
+    ],
+    merchantInfo: {
+      merchantId: '12345678901234567890',
+      merchantName: 'Demo Merchant',
+    },
+    transactionInfo: {
+      totalPriceStatus: 'FINAL',
+      totalPriceLabel: 'Total',
+      totalPrice: '100.00',
+      currencyCode: 'USD',
+      countryCode: 'US',
+    },
+  };
+
+  button.addEventListener('loadpaymentdata', event => {
+    console.log('load payment data', event.detail);
+  });
+</script>
 
         <!-- SECTION 3: ADMIN DASHBOARD -->
         <div id="adminPage" class="glass rounded-3xl p-8 md:p-12 border-t border-l border-white/20 shadow-2xl hidden">
@@ -233,22 +281,21 @@
             </div>
             <h3 class="header-font text-2xl font-bold mb-2">Registration Saved</h3>
             <p class="text-gray-400 mb-8">Data has been synced to Google Sheets.</p>
-            <!-- Changed onclick from location.reload() to closeSuccessModal() -->
-            <button onclick="closeSuccessModal()" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase tracking-widest">Done</button>
+            <button onclick="location.reload()" class="w-full bg-white text-black py-3 rounded-xl font-bold uppercase tracking-widest">Done</button>
         </div>
     </div>
 
     <script>
         // --- 1. FIREBASE CONFIGURATION ---
+        // IMPORTANT: Ensure "localhost" or your actual domain is added to "Authorized Domains" 
+        // in Firebase Console > Authentication > Settings.
         const firebaseConfig = {
-            apiKey: "AIzaSyAk3HlIlYCRi24ctsVo3wkZq9dqWLqFCqM",
-            authDomain: "registration-page-5025d.firebaseapp.com",
-            databaseURL: "https://registration-page-5025d-default-rtdb.firebaseio.com",
-            projectId: "registration-page-5025d",
-            storageBucket: "registration-page-5025d.firebasestorage.app",
-            messagingSenderId: "142199310593",
-            appId: "1:142199310593:web:a2cc72fa4d0ce3eb15b300",
-            measurementId: "G-JK512LQHFF"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
         
         // Initialize Firebase
@@ -261,13 +308,20 @@
         // --- 2. AUTHENTICATION LOGIC ---
         async function handleGoogleSignIn() {
             try {
+                // If in a preview environment or iframe, popup might fail. 
+                // Using signInWithPopup but catching common environment errors.
                 const result = await auth.signInWithPopup(provider);
                 const user = result.user;
                 fillUserForm(user);
             } catch (error) {
-                console.error("Auth Error Details:", error);
-                if (error.code === 'auth/unauthorized-domain') {
-                    alert("DOMAIN ERROR: Add this domain to Firebase Console > Auth > Settings.");
+                console.error("Auth Error:", error);
+                
+                // Detailed environment error handling
+                if (error.code === 'auth/operation-not-supported-in-this-environment') {
+                    alert("Google Sign-in is blocked in this preview window. Please host the file on a web server (http/https) to enable authentication.");
+                    document.getElementById('envWarning').classList.remove('hidden');
+                } else if (error.code === 'auth/popup-blocked') {
+                    alert("Popup blocked by browser. Please enable popups for this site.");
                 } else {
                     alert("Sign-in failed: " + error.message);
                 }
@@ -276,10 +330,15 @@
 
         function fillUserForm(user) {
             document.getElementById('email').value = user.email;
+            
+            // Split Display Name into First and Last
             const nameParts = (user.displayName || "").split(" ");
             document.getElementById('firstName').value = nameParts[0] || "";
             document.getElementById('lastName').value = nameParts.slice(1).join(" ") || "";
+            
             document.getElementById('userDisplayName').innerText = user.displayName || user.email;
+            
+            // Move to registration page
             showPage('registerPage');
         }
 
@@ -295,23 +354,10 @@
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Saving...";
             btn.disabled = true;
-            // Success modal appears. Hidden iframe handles the actual submission in the background.
+
+            // Show the Success Modal immediately
             document.getElementById('successModal').classList.remove('hidden');
         });
-
-        window.closeSuccessModal = () => {
-            // Hide modal
-            document.getElementById('successModal').classList.add('hidden');
-            // Reset button
-            const btn = document.getElementById('submitBtn');
-            btn.innerText = "Submit Registration";
-            btn.disabled = false;
-            // Clear only the fields that aren't auto-filled
-            document.getElementById('phone').value = "";
-            document.getElementById('game').selectedIndex = 0;
-            document.getElementById('branch').selectedIndex = 0;
-            document.getElementById('year').selectedIndex = 0;
-        };
 
         window.showPage = (id) => {
             ['posterPage', 'registerPage', 'adminPage'].forEach(p => document.getElementById(p).classList.add('hidden'));
@@ -326,6 +372,7 @@
             }
         };
 
+        // On Load check
         auth.onAuthStateChanged(user => {
             if (user) {
                 fillUserForm(user);
